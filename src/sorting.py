@@ -56,8 +56,8 @@ class Sorting:
 
 def main():
     t = Sorting()
-    testData = ['b','z','t','r','d','e']
-
+    #testData = ['b','z','t','r','d','e']
+    testData = ['z','b','z','t','r','d','e','y']
     t.quicksort(testData, 0, len(testData) - 1)
     print testData
     
