@@ -8,8 +8,10 @@
 __author__ = 'Daniel Dittenhafer'
 import graph
 import collections
+import os
 import sys
 from timeit import default_timer as timer
+from colorama import Fore, Back, Style 
 """
 Your task is to code up the algorithm from the video lectures for computing
 strongly connected components (SCCs), and to run this algorithm on the given 
@@ -62,7 +64,7 @@ class scc:
             if i % 100 == 0:
                 print "dfs_loop[{0}]".format(i)
 
-            if not g.vertices[i].explored:
+            if g.vertices.has_key(i) and not g.vertices[i].explored:
                 #s = i
                 self.dfs_reverse(g, i)
 
@@ -117,11 +119,33 @@ def main():
     tests = [
         # path to graph file, finishing times dict, leaders dict
         #("D:\Code\Python\py-sandbox\data\graph-small-SCC.txt", {1: 7, 2: 3, 3: 1, 4: 8, 5: 2, 6: 5, 7: 9, 8: 4, 9: 6}, {1: 7, 2: 8, 3: 3, 4: 7, 5: 8, 6: 3, 7: 7, 8: 8, 9: 3})
-        ("D:\Code\Python\py-sandbox\data\graph-small-SCC.txt", [(3, 1), (5, 2), (2, 3), (8, 4), (6, 5), (9, 6), (1, 7), (4, 8), (7, 9)], {1: 7, 2: 8, 3: 9, 4: 7, 5: 8, 6: 9, 7: 7, 8: 8, 9: 9}, [3,3,3])
-        ,("D:\Code\Python\py-sandbox\data\graph-small2-SCC.txt", [(3, 1), (1, 2), (2, 3), (6, 4), (7, 5), (8, 6), (4, 7), (5, 8)],{1: 2, 2: 2, 3: 2, 4: 5, 5: 5, 6: 8, 7: 8, 8: 8}, [3,3,2])
-        ,("D:\Code\Python\py-sandbox\data\graph-small3-SCC.txt", [(6, 1), (7, 2), (8, 3), (5, 4), (1, 5), (2, 6), (3, 7), (4, 8)],{1: 3, 2: 3, 3: 3, 4: 4, 5: 5, 6: 8, 7: 8, 8: 8}, [3,3,1,1])
-        #,("D:\Code\Python\py-sandbox\data\graphs-SCC.txt", {}, {})
+        #("D:\\Code\\Python\\py-sandbox\\data\\graph-small-SCC.txt", [(3, 1), (5, 2), (2, 3), (8, 4), (6, 5), (9, 6), (1, 7), (4, 8), (7, 9)], {1: 7, 2: 8, 3: 9, 4: 7, 5: 8, 6: 9, 7: 7, 8: 8, 9: 9}, [3,3,3])
+        #,("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-SCC.txt", [(3, 1), (1, 2), (2, 3), (6, 4), (7, 5), (8, 6), (4, 7), (5, 8)],{1: 2, 2: 2, 3: 2, 4: 5, 5: 5, 6: 8, 7: 8, 8: 8}, [3,3,2])
+        #,("D:\\Code\\Python\\py-sandbox\\data\\graph-small3-SCC.txt", [(6, 1), (7, 2), (8, 3), (5, 4), (1, 5), (2, 6), (3, 7), (4, 8)],{1: 3, 2: 3, 3: 3, 4: 4, 5: 5, 6: 8, 7: 8, 8: 8}, [3,3,1,1])
+        #,("D:\\Code\\Python\\py-sandbox\\data\\graph-small4-SCC.txt", [],{}, [7,1])
+        #,("D:\\Code\\Python\\py-sandbox\\data\\graph-small5-SCC.txt", [],{}, [6,3,2,1])
+        #("D:\\Code\\Python\\py-sandbox\\data\\graph-small6-scc.txt", [],{}, [11,10,5,4])
+        ("D:\\Code\\Python\\py-sandbox\\data\\graphs-SCC.txt", {}, {}, [434821, 968, 459, 313, 211])
     ]
+
+    load_test_cases = False
+    if load_test_cases:
+        test_cases_folder = "D:\\Code\\other\\stanford-algs\\testcases\\course2\\assignment1SCC"
+        for filename in os.listdir(test_cases_folder):
+            if filename[:5] != 'input':
+                continue
+
+            outputfile = filename.replace("input_", "output_")
+            with open(test_cases_folder + "\\" + outputfile) as fp:
+                parts = fp.read().split(",")
+
+            output = []
+            for p in parts:
+                op = int(p)
+                if op > 0:
+                    output.append(op)
+
+            tests.append((test_cases_folder + "\\" + filename, [],{}, output))
 
 
     print "Old recurse list: {0}".format(sys.getrecursionlimit())
@@ -139,8 +163,8 @@ def main():
         s = scc()
         s.scc_explore(g, verbose=False)
 
-        ok = t[1] == s.f
-        ok &= t[2] == s.leaders
+        ok = len(t[1]) == 0 or (t[1] == s.f)
+        ok &= len(t[1]) == 0 or t[2] == s.leaders
         if not ok:
             if len(s.f) < 100:
                 print s.f
