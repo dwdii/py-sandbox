@@ -47,12 +47,13 @@ class vertex:
 
 class edge:
 
-    def __init__(self, tail, head):
+    def __init__(self, tail, head, weight=1):
         self._vertices = []
         self._vertices.append(tail)
         self._vertices.append(head)
         self.head = head
         self.tail = tail
+        self.weight = weight
 
     def __getitem__(self, ndx):
         return self._vertices[ndx]
@@ -97,7 +98,7 @@ class graph:
             self._nodes[n].explored = False
 
 
-    def load_data(self, path, verbose = False, delim='\t', directed=False):
+    def load_data(self, path, verbose = False, delim='\t', directed=False, has_edge_weights=False):
         if verbose:
             print "loading " + path
 
@@ -118,7 +119,13 @@ class graph:
                         h = parts[i]
                         if len(h.strip()) > 0:
 
-                            h = int(h)
+                            if has_edge_weights:
+                                hparts = h.split(",")
+                                h = int(hparts[0])
+                                weight = int(hparts[1])
+                            else:
+                                h = int(h)
+                                weight = 1
 
                             #if h not in self._adjacencyList[v]:
                             #    self._adjacencyList[v][h] = 1
@@ -143,7 +150,7 @@ class graph:
                                 pass
                             else:
                                 # Add new edge
-                                e = edge(self._nodes[v], self._nodes[h])
+                                e = edge(self._nodes[v], self._nodes[h], weight)
                                 self._nodes[v].edges.append(e)
                                 if not directed:
                                     self._nodes[h].edges.append(e)
