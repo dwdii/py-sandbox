@@ -11,7 +11,7 @@ import collections
 import os
 import sys
 from timeit import default_timer as timer
-from colorama import Fore, Back, Style 
+import itertools
 """
 Your task is to run Dijkstra's shortest-path algorithm on this graph, using 1 
 (the first vertex) as the source vertex, and to compute the shortest-path 
@@ -34,34 +34,75 @@ import heapq
 class dijkstra:
 
     def __init__(self):
-        pass
+        self.entry_finder = {}               # mapping of tasks to entries
+        self.REMOVED = '<removed-task>'      # placeholder for a removed task
+        self.counter = itertools.count()     # unique sequence count
 
     def run(self, g, s, verbose=False):
         h = []
+        X = {} # vertices processed so far
+        A = {} # shortest paths
         done = False
         infin = 1000000
 
-        for n in g.vertices:
+        """for n in g.vertices:
             dgs = infin
             if n == s:
                 dgs = 0
-            heapq.heappush(h, (dgs, n))
+            heapq.heappush(h, (dgs, n))"""
+
+        A[s] = 0
+        for e in g.vertices[s].edges:
+            dgs = A[s] + e.weight
+            self.heap_add(h, e.head.id, priority=dgs)
 
         while not done:
-            wi = heapq.heappop(h)
-            w = g.vertices[wi[1]]
+            dgs, wi = self.heap_pop(h)
+            w = g.vertices[wi]
+
+            # Store final shortest path value for w.id vertex
+            A[w.id] = dgs
+
+            # loop to 
+            for e in w.edges:
+                if ((e.tail.id == w.id and e.head.id in A) or 
+                    (e.head.id == w.id and e.tail.id in A)):
+                    pass # Already determined this one
+                else:
+                    dgs = A[w.id] + e.weight
+                    self.heap_add(h, e.get_other_side(w.id), priority=dgs)
 
             
-            
-            done = True
-            pass
+            done = len(A) == len(g.vertices)
 
+        return A
 
+    def heap_add(self, h, task, priority=0):
+        'Add a new task or update the priority of an existing task'
+        if task in self.entry_finder:
+            self.heap_remove(task)
+        count = next(self.counter)
+        entry = [priority, count, task]
+        self.entry_finder[task] = entry
+        heapq.heappush(h, entry)
 
+    def heap_remove(self, task):
+        'Mark an existing task as REMOVED.  Raise KeyError if not found.'
+        entry = self.entry_finder.pop(task)
+        entry[-1] = self.REMOVED
+
+    def heap_pop(self, h):
+        'Remove and return the lowest priority task. Raise KeyError if empty.'
+        while h:
+            priority, count, task = heapq.heappop(h)
+            if task is not self.REMOVED:
+                del self.entry_finder[task]
+                return priority, task
+        raise KeyError('pop from an empty priority queue')
 
 
 def load_stanford_algs_test_cases(tests):
-    test_cases_folder = "D:\\Code\\other\\stanford-algs\\testcases\\course2\\assignment1SCC"
+    test_cases_folder = "D:\\Code\\other\\stanford-algs\\testcases\\course2\\assignment2Dijkstra"
     for filename in os.listdir(test_cases_folder):
         if filename[:5] != 'input':
             continue
@@ -83,10 +124,10 @@ def main():
 
     tests = [
         # path to graph file, finishing times dict, leaders dict
-        ("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", {}, {})
+        #("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", [], {}, [])
     ]
 
-    load_test_cases = False
+    load_test_cases = True
     if load_test_cases:
         load_stanford_algs_test_cases(tests)
 
@@ -100,28 +141,22 @@ def main():
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
         s = dijkstra()
-        s.run(g, 1, verbose=True)
+        A = s.run(g, 1, verbose=True)
 
-        ok = len(t[1]) == 0 or (t[1] == s.f)
-        ok &= len(t[1]) == 0 or t[2] == s.leaders
+        res = ""
+        outNdx = [7,37,59,82,99,115,133,165,188,197]
+        for i in outNdx:
+            if len(res) > 0:
+                res += ","
+            res += "{0}".format(A[i])
+
+        print res
+        ok = res == t[3] #not res == "13374,2610,6094,10341,6765,16786,2029,2442,2505,9831"
+        #ok |= not res == ""
         if not ok:
-            if len(s.f) < 100:
-                print s.f
-                print s.leaders
             print "ERROR!"
         else:
             print "OK"
-
-        print s.counts
-        res = sorted(s.counts.values(), reverse=True)[0:5]
-        print res
-        if res == t[3]:
-            print "GOOD!"
-        elif res == [434821, 968, 459, 314, 211]:
-            print "NOPE"
-        else:
-            print "NOPE"
-
     
 if __name__ == "__main__":
     main()

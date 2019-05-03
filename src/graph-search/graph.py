@@ -53,14 +53,24 @@ class edge:
         self._vertices.append(head)
         self.head = head
         self.tail = tail
-        self.weight = weight
+        self._weight = weight
 
     def __getitem__(self, ndx):
         return self._vertices[ndx]
 
     @property
+    def weight(self):
+        return self._weight
+
+    @property
     def vertices(self):
         return self._vertices
+
+    def get_other_side(self, vid):
+        if self.head.id == vid:
+            return self.tail.id
+        else:
+            return self.head.id
 
     def changeVertex(self, fromV, toV):
         # if edge "left" vertex = "left"
