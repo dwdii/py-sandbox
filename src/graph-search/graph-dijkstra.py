@@ -6,12 +6,13 @@
 # Description: Coursera Algorithms Graph Search and Data Structures
 #
 __author__ = 'Daniel Dittenhafer'
-import graph
 import collections
+import graph
+import myheap
+import itertools
 import os
 import sys
 from timeit import default_timer as timer
-import itertools
 """
 Your task is to run Dijkstra's shortest-path algorithm on this graph, using 1 
 (the first vertex) as the source vertex, and to compute the shortest-path 
@@ -39,9 +40,10 @@ class dijkstra:
         self.counter = itertools.count()     # unique sequence count
 
     def run(self, g, s, verbose=False):
-        h = []
+        h = myheap.heapqplus()
         X = {} # vertices processed so far
         A = {} # shortest paths
+        B = {}
         done = False
         infin = 1000000
 
@@ -51,57 +53,59 @@ class dijkstra:
                 dgs = 0
             heapq.heappush(h, (dgs, n))"""
 
-        A[s] = 0
-        for e in g.vertices[s].edges:
-            dgs = A[s] + e.weight
-            self.heap_add(h, e.head.id, priority=dgs)
+        # distance to source is zero
+        A[s] = 0 
+        X[s] = None
+        B[s] = [1]
+        for n in g.vertices:
+            if n != s:
+                A[n] = infin
+                
+            h.add(n, priority=A[n])
+
+        # Populate heap with current estimates for source's neighbors
+        #for e in g.vertices[s].edges:
+        #    dgs = A[s] + e.weight
+        #    h.add_if_priority_lower(e.head.id, priority=dgs)
 
         while not done:
-            dgs, wi = self.heap_pop(h)
+            dgs, wi = h.pop()
             w = g.vertices[wi]
 
             # Store final shortest path value for w.id vertex
             A[w.id] = dgs
+            X[w.id] = 1
+            if verbose:
+                print "{0} ({1}) => {2}".format(w.id, dgs, B[w.id])
 
             # loop to 
+            
             for e in w.edges:
-                if ((e.tail.id == w.id and e.head.id in A) or 
-                    (e.head.id == w.id and e.tail.id in A)):
+                other_id = e.get_other_side(w.id)
+                if ((e.tail.id == w.id and e.head.id in X) or 
+                    (e.head.id == w.id and e.tail.id in X)):
+
+                    if A[other_id] + e.weight < A[w.id]:
+                        A[w.id] = A[other_id] + e.weight
+                        B[w.id] = B[other_id][:]
+                        B[w.id].append(w.id)
+
                     pass # Already determined this one
                 else:
                     dgs = A[w.id] + e.weight
-                    self.heap_add(h, e.get_other_side(w.id), priority=dgs)
+                    
+                    if(h.add_if_priority_lower(other_id, priority=dgs)):
+                        B[other_id] = B[w.id][:]
+                        B[other_id].append(other_id)
 
             
-            done = len(A) == len(g.vertices)
+            done = len(X) == len(g.vertices)
 
-        return A
-
-    def heap_add(self, h, task, priority=0):
-        'Add a new task or update the priority of an existing task'
-        if task in self.entry_finder:
-            self.heap_remove(task)
-        count = next(self.counter)
-        entry = [priority, count, task]
-        self.entry_finder[task] = entry
-        heapq.heappush(h, entry)
-
-    def heap_remove(self, task):
-        'Mark an existing task as REMOVED.  Raise KeyError if not found.'
-        entry = self.entry_finder.pop(task)
-        entry[-1] = self.REMOVED
-
-    def heap_pop(self, h):
-        'Remove and return the lowest priority task. Raise KeyError if empty.'
-        while h:
-            priority, count, task = heapq.heappop(h)
-            if task is not self.REMOVED:
-                del self.entry_finder[task]
-                return priority, task
-        raise KeyError('pop from an empty priority queue')
+        return A, B
 
 
-def load_stanford_algs_test_cases(tests):
+
+def load_stanford_algs_test_cases(tests, outndx):
     test_cases_folder = "D:\\Code\\other\\stanford-algs\\testcases\\course2\\assignment2Dijkstra"
     for filename in os.listdir(test_cases_folder):
         if filename[:5] != 'input':
@@ -109,30 +113,32 @@ def load_stanford_algs_test_cases(tests):
 
         outputfile = filename.replace("input_", "output_")
         with open(test_cases_folder + "\\" + outputfile) as fp:
-            parts = fp.read().split(",")
+            expected_out = fp.read().split(",")
 
         output = []
-        for p in parts:
+        for p in expected_out:
             op = int(p)
             if op > 0:
                 output.append(op)
 
-        tests.append((test_cases_folder + "\\" + filename, [],{}, output))
+        tests.append((test_cases_folder + "\\" + filename, outndx,{}, output))
 
 
 def main():
 
     tests = [
         # path to graph file, finishing times dict, leaders dict
-        #("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", [], {}, [])
+        #("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", [7,37,59,82,99,115,133,165,188,197], {}, [])
+        #("D:\\Code\\Python\\py-sandbox\\data\\graph-small-dijkstra.txt", [1,2,3,4], {}, [0,3,2,7]),
+        ("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
     load_test_cases = True
     if load_test_cases:
-        load_stanford_algs_test_cases(tests)
+        load_stanford_algs_test_cases(tests, [7,37,59,82,99,115,133,165,188,197])
 
     # iterate over the test cases
-    for t in tests:
+    for t in tests[0:2]:
         # load the graph (while timing it)
         g = graph.graph()
         start = timer()
@@ -141,20 +147,29 @@ def main():
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
         s = dijkstra()
-        A = s.run(g, 1, verbose=True)
+        A, B = s.run(g, 1, verbose=True)
 
         res = ""
-        outNdx = [7,37,59,82,99,115,133,165,188,197]
+        outNdx = t[1]
+        output = []
         for i in outNdx:
-            if len(res) > 0:
-                res += ","
-            res += "{0}".format(A[i])
+            if len(A) >= i:
+                if len(res) > 0:
+                    res += ","
+                res += "{0}".format(A[i])
+                output.append(A[i])
 
         print res
-        ok = res == t[3] #not res == "13374,2610,6094,10341,6765,16786,2029,2442,2505,9831"
+        ok = output == t[3] #not res == "13374,2610,6094,10341,6765,16786,2029,2442,2505,9831"
         #ok |= not res == ""
         if not ok:
             print "ERROR!"
+            c = 0
+            for i in xrange(len(output)):
+                if output[i] == t[3][i]:
+                    c += 1
+            print "{0} of {1}".format(c, len(output))
+
         else:
             print "OK"
     
