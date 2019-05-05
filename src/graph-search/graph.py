@@ -146,7 +146,7 @@ class graph:
 
                             # Look for existing edge to map
                             e = None
-                            if not directed:
+                            if not directed and not has_edge_weights:
                                 # Only non-directed graphs have this need
                                 for eh in self._nodes[h].edges:
                                     if ((eh.vertices[0].id == v and eh.vertices[1].id == h) or 

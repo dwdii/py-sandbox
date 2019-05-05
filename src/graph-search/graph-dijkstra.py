@@ -76,7 +76,11 @@ class dijkstra:
             A[w.id] = dgs
             X[w.id] = 1
             if verbose:
-                print "{0} ({1}) => {2}".format(w.id, dgs, B[w.id])
+                if w.id in B:
+                    print "{0} ({1}) => {2}".format(w.id, dgs, B[w.id])
+                else:
+                    print "{0} ({1}) => {2}".format(w.id, dgs, "***missing path***")
+
 
             # loop to 
             
@@ -126,6 +130,7 @@ def load_stanford_algs_test_cases(tests, outndx):
 
 def main():
 
+    tests_correct = 0
     tests = [
         # path to graph file, finishing times dict, leaders dict
         #("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", [7,37,59,82,99,115,133,165,188,197], {}, [])
@@ -137,8 +142,11 @@ def main():
     if load_test_cases:
         load_stanford_algs_test_cases(tests, [7,37,59,82,99,115,133,165,188,197])
 
+    # The real problem
+    tests.append(("D:\Code\Python\py-sandbox\data\graphs-dijkstraData.txt", [7,37,59,82,99,115,133,165,188,197], {}, [2599,2610,2947,2052,2367,2399,2029,2442,2505,3068]))
+
     # iterate over the test cases
-    for t in tests[0:2]:
+    for t in tests:
         # load the graph (while timing it)
         g = graph.graph()
         start = timer()
@@ -166,12 +174,14 @@ def main():
             print "ERROR!"
             c = 0
             for i in xrange(len(output)):
-                if output[i] == t[3][i]:
+                if len(t[3]) > i and output[i] == t[3][i]:
                     c += 1
             print "{0} of {1}".format(c, len(output))
 
         else:
             print "OK"
+            tests_correct += 1
     
+    print "{0} of {1} tests passed".format(tests_correct, len(tests))
 if __name__ == "__main__":
     main()

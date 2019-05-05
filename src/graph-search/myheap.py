@@ -38,7 +38,10 @@ class heapqplus:
 
 
     def remove(self, task):
-        'Mark an existing task as REMOVED.  Raise KeyError if not found.'
+        """Mark an existing task as REMOVED.  
+           Raise KeyError if not found.
+           Remove it from the entry_finder dictionary too."""
+
         entry = self._entry_finder.pop(task)
         entry[-1] = self.REMOVED
 
