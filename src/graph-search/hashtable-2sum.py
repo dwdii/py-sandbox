@@ -34,10 +34,8 @@ class two_sum:
         pass
 
     def run(self, data, verbose = False):
-        ht = self.load_hash_table(set(data))
         sdata = sorted(set(data))
         found = {}
-        seen = {}
         cnt = 0
 
         for x in sdata:
@@ -55,22 +53,9 @@ class two_sum:
                     t = x + y
                     if found.has_key(t):
                         pass
-                    #if ( (found.has_key(x) and found[x] == y) or
-                    #     (found.has_key(y) and found[y] == x)):
-                    #     pass
                     else:
                         cnt += 1
                         found[t] = "{0} + {1}".format(x, y)
-            
-
-            #if not found.has_key(x):
-            #    for t in xrange(-10000, 10001):
-                    #if verbose and t % 1000 == 0:
-                    #    print "{0}".format(t)
-            #        y = t - x
-            #        if ht.has_key(y) and not found.has_key(x):
-            #            found[y] = x
-            #            cnt += 1
 
         return cnt, found
 
@@ -144,15 +129,15 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course2\\assignment4TwoSum")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\graph-algo1-programming_prob-2sum.txt", [1213]))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\graph-algo1-programming_prob-2sum.txt", []))
 
     # iterate over the test cases
-    for t in tests[50:]:
+    for t in tests:
         # load the graph (while timing it)
         start = timer()
         data = load_int_array(t[0])
@@ -167,7 +152,7 @@ def main():
         print res
 
         expected = t[1]
-        ok = res == expected[0] 
+        ok = len(expected) == 0 or res == expected[0] 
         if not ok:
             print "ERROR! Expected {0}".format(expected[0])
             c = collections.defaultdict(int)
