@@ -37,7 +37,7 @@ class greedy_clustering:
 
     def run(self, g, k):
         uf = union_find(g.vertices.keys())
-        se = g.edges.sort(key=lambda x: x.weight)
+        g.edges.sort(key=lambda x: x.weight)
 
         T = []
 
