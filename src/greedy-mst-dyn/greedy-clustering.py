@@ -41,20 +41,28 @@ class greedy_clustering:
 
         T = []
 
-        for i in g.edges:
-            c1 = uf.find(i[0].id)
-            c2 = uf.find(i[1].id)
+        for i in xrange(len(g.edges)):
+            e = g.edges[i]
+            c1 = uf.find(e[0].id)
+            c2 = uf.find(e[1].id)
 
             if c1.id != c2.id:
                 # not a cycle
-                T.append(i)
-                uf.union(c1.id, c2.id)
+                #
+                # if check if we are get max cluster count
                 if uf.clusters == k:
+                    # yes, break
                     break
+                else:
+                    # other wise merge and proceed
+                    T.append(e)
+                    uf.union(c1.id, c2.id)
 
-        return -1
+        # next
+        eNext = g.edges[i]
+        max_spacing = eNext.weight
 
-
+        return max_spacing, uf
 
 
 def load_stanford_algs_test_cases(tests, test_cases_folder):
@@ -85,16 +93,16 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment2Clustering\\question1")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering1.txt", []))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering1.txt", [106]))
 
     # iterate over the test cases
-    for t in tests[10:11]:
+    for t in tests:
         # load the graph data (while timing it)
         start = timer()
         g = graph()
@@ -105,7 +113,7 @@ def main():
         m = greedy_clustering()
 
         start = timer()
-        res = m.run(g, 4)
+        res, cl = m.run(g, 4)
         end = timer()
 
         print "mst of {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start))
@@ -120,7 +128,7 @@ def main():
             print "OK"
             tests_correct += 1
 
-    print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests) * 2, (tests_correct / (len(tests) * 2)) * 100)
+    print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests), (tests_correct / (len(tests))) * 100)
 
 
 if __name__ == "__main__":
