@@ -18,6 +18,7 @@ class vertex:
         self._edges = []
         self._explored = False
         self._incoming = []
+        self._tag = None
 
     @property
     def edges(self):
@@ -34,10 +35,18 @@ class vertex:
     @property
     def explored(self):
         return self._explored
-    
+
     @explored.setter
     def explored(self, value):
         self._explored = value
+
+    @property
+    def tag(self):
+        return self._tag
+
+    @tag.setter
+    def tag(self, v):
+        self._tag = v
 
     def __str__(self):
         return "vertex " + str(self.id)
@@ -227,3 +236,33 @@ class graph:
                         self._nodes[v].edges.append(e)
                         self._nodes[h].edges.append(e)
                         self._edges.append(e)
+
+    def load_data3(self, path, verbose = False, delim=" "):
+        """
+            Loads a file describing an undirected graph with Hamming distance edge costs, formated as:
+
+                [# of nodes] [# of bits for each node's label]
+                [first bit of node 1] ... [last bit of node 1]
+                [first bit of node 2] ... [last bit of node 2]
+                ...
+        """
+        if verbose:
+            print "loading " + path
+
+        with open(path) as fp:
+            lines = fp.read().split("\n")
+
+            # We aren't using the header, so strip it off.
+            # The header would have a vertices edges pair.
+            lines = lines[1:]
+
+            v = 0
+            for l in lines:
+                v += 1
+
+                if v not in self._nodes:
+                    vo = vertex(v)
+                    vo.tag = l.strip()
+                    self._nodes[v] = vo
+
+
