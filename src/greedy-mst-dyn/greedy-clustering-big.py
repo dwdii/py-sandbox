@@ -15,9 +15,9 @@ import os
 #import sys
 from timeit import default_timer as timer
 from src.utillib.unionfind import union_find
-from src.utillib.graph import graph
+from src.utillib.graph import graph, edge
 """
-The distance between two nodes uu and vv in this problem is defined as the
+The distance between two nodes u and v in this problem is defined as the
 Hamming distance--- the number of differing bits --- between the two nodes'
 labels. For example, the Hamming distance between the 24-bit label of node
 #2 above and the label "0 1 0 0 0 1 0 0 0 1 0 1 1 1 1 1 1 0 1 0 0 1 0 1" is
@@ -34,16 +34,34 @@ class greedy_clustering_hamming:
     def __init__(self):
         pass
 
-    def run(self, g, k):
+    def run(self, g, min_spacing = 3, verbose = True):
         uf = union_find(g.vertices.keys())
 
         # first need to compute the edge costs for all vertices...
-        
+        start = timer()
+        gvi = g.vertices.items()
+        lgv = len(g.vertices)
+        for v1 in xrange(lgv):
+            vo1 = gvi[v1][1]
+            for v2 in xrange(v1, lgv):
+                vo2 = gvi[v2][1]
+                weight = self.hamming_distance(vo1.tag, vo2.tag)
+                if weight > min_spacing:
+                    continue
+                
+                e = edge(vo1, vo2, weight)
+                g.edges.append(e)
+                #vo1.edges.append(e)
+                #vo2.edges.append(e)
+        end = timer()
+        if verbose:
+            print "edges created in {0} secs".format(end - start)
 
+        # then sort ascending
         g.edges.sort(key=lambda x: x.weight)
 
+        # does everything else just work?
         T = []
-
         for i in xrange(len(g.edges)):
             e = g.edges[i]
             c1 = uf.find(e[0].id)
@@ -53,12 +71,12 @@ class greedy_clustering_hamming:
                 # not a cycle
                 #
                 # if check if we are get max cluster count
-                if uf.clusters == k:
+                if e.weight >= min_spacing:
                     # yes, break
                     break
                 else:
                     # other wise merge and proceed
-                    T.append(e)
+                    #T.append(e)
                     uf.union(c1.id, c2.id)
 
         # next
@@ -71,7 +89,7 @@ class greedy_clustering_hamming:
         """
         https://pythonadventures.wordpress.com/2010/10/19/hamming-distance/
         """
-        assert len(s1) == len(s2)
+        #assert len(s1) == len(s2)
         return sum(ch1 != ch2 for ch1, ch2 in zip(s1, s2))
 
 
@@ -112,7 +130,7 @@ def main():
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering_big.txt", [106]))
 
     # iterate over the test cases
-    for t in tests[10:11]:
+    for t in tests:
         # load the graph data (while timing it)
         start = timer()
         g = graph()
@@ -123,7 +141,8 @@ def main():
         m = greedy_clustering_hamming()
 
         start = timer()
-        res, cl = m.run(g, 4)
+        ms, cl = m.run(g, 3)
+        res = cl.clusters
         end = timer()
 
         print "mst of {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start))

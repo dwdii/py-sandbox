@@ -6,6 +6,7 @@
 # Description: Coursera Algorithms Graphs and Data Structures
 #
 __author__ = 'Daniel Dittenhafer'
+from bitarray import bitarray
 import random
 """
 Graph, Edge and Vertex classes
@@ -258,11 +259,12 @@ class graph:
 
             v = 0
             for l in lines:
-                v += 1
+                if len(l.strip()) > 0:
+                    v += 1
 
-                if v not in self._nodes:
-                    vo = vertex(v)
-                    vo.tag = l.strip()
-                    self._nodes[v] = vo
+                    if v not in self._nodes:
+                        vo = vertex(v)
+                        vo.tag = bitarray(l.strip().replace(" ", ""))
+                        self._nodes[v] = vo
 
 
