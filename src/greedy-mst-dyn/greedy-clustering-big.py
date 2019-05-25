@@ -16,6 +16,7 @@ import os
 from timeit import default_timer as timer
 from src.utillib.unionfind import union_find
 from src.utillib.graph import graph, edge
+#from bitarray import bitarray
 """
 The distance between two nodes u and v in this problem is defined as the
 Hamming distance--- the number of differing bits --- between the two nodes'
@@ -27,6 +28,12 @@ The question is: what is the largest value of k such that there is a
 k-clustering with spacing at least 3? That is, how many clusters are needed to
 ensure that no pair of nodes with all but 2 bits in common get split into
 different clusters?
+
+NOTE: The graph implicitly defined by the data file is so big that you probably
+can't write it out explicitly, let alone sort the edges by cost. So you will
+have to be a little creative to complete this part of the question. For
+example, is there some way you can identify the smallest distances without
+explicitly looking at every pair of nodes?
 """
 
 class greedy_clustering_hamming:
@@ -45,10 +52,10 @@ class greedy_clustering_hamming:
             vo1 = gvi[v1][1]
             for v2 in xrange(v1, lgv):
                 vo2 = gvi[v2][1]
-                weight = self.hamming_distance(vo1.tag, vo2.tag)
+                weight = self.hamming_distance_bitwise(vo1.tag, vo2.tag)
                 if weight > min_spacing:
                     continue
-                
+
                 e = edge(vo1, vo2, weight)
                 g.edges.append(e)
                 #vo1.edges.append(e)
@@ -92,6 +99,12 @@ class greedy_clustering_hamming:
         #assert len(s1) == len(s2)
         return sum(ch1 != ch2 for ch1, ch2 in zip(s1, s2))
 
+    def hamming_distance_bitwise(self, s1, s2):
+        """
+        Bitwise version
+        """
+        #assert len(s1) == len(s2)
+        return sum(s1 ^ s2)
 
 def load_stanford_algs_test_cases(tests, test_cases_folder):
 
@@ -126,6 +139,8 @@ def main():
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment2Clustering\\question2")
 
+
+
     # The real problem
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering_big.txt", [106]))
 
@@ -139,6 +154,7 @@ def main():
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
         m = greedy_clustering_hamming()
+        #hdb = m.hamming_distance_bitwise(bitarray("1010"), bitarray("1001"))
 
         start = timer()
         ms, cl = m.run(g, 3)
