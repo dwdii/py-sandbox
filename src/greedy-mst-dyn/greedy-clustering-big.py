@@ -7,8 +7,8 @@ from __future__ import division
 # Description: Coursera Algorithms Greedy Algos, MST and Dynamic Programming
 #
 __author__ = 'Daniel Dittenhafer'
-#import collections
-#import copy
+import collections
+import copy
 #import heapq
 #import itertools
 import os
@@ -16,7 +16,7 @@ import os
 from timeit import default_timer as timer
 from src.utillib.unionfind import union_find
 from src.utillib.graph import graph, edge
-#from bitarray import bitarray
+from bitarray import bitarray
 """
 The distance between two nodes u and v in this problem is defined as the
 Hamming distance--- the number of differing bits --- between the two nodes'
@@ -92,6 +92,186 @@ class greedy_clustering_hamming:
 
         return max_spacing, uf
 
+    # def run2(self, g, min_spacing = 3, verbose = True):
+    #     uf = union_find(g.vertices.keys())
+
+    #     # first need to map vertices for constant time tag lookups
+    #     start = timer()
+    #     tags = collections.defaultdict(list)
+    #     for i in g.vertices:
+    #         v = g.vertices[i]
+    #         tags[v.tag.to01()].append(v)
+    #     end = timer()
+    #     if verbose:
+    #         print "tag hashtable created in {0} secs".format(end - start)
+
+    #     bitlist1 = []
+    #     zeroBit = bitarray("0" * len(tags.keys()[0]))
+    #     for i in xrange(len(zeroBit)):
+    #         nextBit = copy.copy(zeroBit)
+    #         nextBit[i] = 1
+    #         bitlist1.append(nextBit)
+
+    #     bitlist2 = []
+    #     for b1 in bitlist1:
+    #         for i in xrange(len(zeroBit)):
+    #             nextBit = copy.copy(b1)
+    #             nextBit[i] = 1
+    #             if nextBit == b1:
+    #                 pass
+    #             else:
+    #                 bitlist2.append(nextBit)
+
+    #     bitlist3 = self.bitvariation(bitlist2, len(zeroBit))
+    #     bitlist4 = self.bitvariation(bitlist3, len(zeroBit))
+
+    #     self.clusterbits(g, tags, uf, bitlist1)
+    #     self.clusterbits(g, tags, uf, bitlist2)
+    #     self.clusterbits(g, tags, uf, bitlist3)
+    #     self.clusterbits(g, tags, uf, bitlist4)
+
+    #     return None, uf
+
+    def run3(self, g, min_spacing = 3, verbose = True):
+        uf = union_find(g.vertices.keys())
+
+        # first need to map vertices for constant time tag lookups
+        start = timer()
+        tags = collections.defaultdict(list)
+        for i in g.vertices:
+            v = g.vertices[i]
+            tags[v.tag.to01()].append(v)
+        end = timer()
+        if verbose:
+            print "tag hashtable created in {0} secs".format(end - start)
+
+        # create the 1-3 distance versions of all tags
+        start = timer()
+        tagvariations = {}
+        for i in g.vertices:
+            v = g.vertices[i]
+            tagvariations[v.tag.to01()] = self.build_tag_variations(v)
+        end = timer()
+        if verbose:
+            print "tag variations created in {0} secs".format(end - start)
+
+        # now do the clustering...
+        self.cluster_by_tag(g, tags, tagvariations, uf, verbose)
+
+        return None, uf
+
+
+    def cluster_by_tag(self, g, tags, tagvariations, uf, verbose):
+
+        # Distances
+        for d in xrange(3):
+
+            if verbose:
+                print "working on distance {0}. current clusters: {1}".format(d+1, uf.clusters)
+
+            # Loop over the vertices O(n)
+            for i in g.vertices:
+
+                # Get the vertex out
+                v = g.vertices[i]
+
+                tv = tagvariations[v.tag.to01()]
+
+                for t in tv[d]:
+                    stag = t.to01()
+                    if tags.has_key(stag):
+                        c1 = uf.find(v.id)
+                        for t in tags[stag]:
+                            c2 = uf.find(t.id)
+                            if c1.id != c2.id:
+                                uf.union(c1.id, c2.id)
+
+    def build_tag_variations(self, v):
+
+        tagvariations = []
+
+        # array of distance = 1 tags
+        bitlist1 = []
+        tagvariations.append(bitlist1)
+
+        # array of distance = 2 tags
+        bitlist2 = []
+        tagvariations.append(bitlist2)
+
+        # array of distance = 3 tags
+        bitlist3 = []
+        tagvariations.append(bitlist3)
+
+        # array of distance = 3 tags
+        bitlist4 = []
+        tagvariations.append(bitlist4)
+
+        # for each bit in the tag
+        for b1 in xrange(len(v.tag)):
+
+            bt1 = copy.copy(v.tag)
+
+            # flip a bit (distance 1)
+            bt1[b1] = not bt1[b1]
+
+            # save it
+            bitlist1.append(bt1)
+
+            for b2 in xrange(b1 + 1, len(v.tag)):
+                bt2 = copy.copy(bt1)
+
+                # flip a bit (distance 1)
+                bt2[b2] = not bt2[b2]
+
+                # save it
+                bitlist2.append(bt2)
+
+                for b3 in xrange(b2 + 1, len(v.tag)):
+                    bt3 = copy.copy(bt2)
+
+                    # flip a bit
+                    bt3[b3] = not bt3[b3]
+
+                    # save it
+                    bitlist3.append(bt3)
+
+                    for b4 in xrange(b3 + 1, len(v.tag)):
+                        bt4 = copy.copy(bt3)
+
+                        # flip a bit
+                        bt4[b4] = not bt4[b4]
+
+                        # save it
+                        bitlist4.append(bt4)
+
+        return tagvariations
+
+    # def clusterbits(self, g, tags, uf, bitlist):
+    #     for i in g.vertices:
+    #         v = g.vertices[i]
+    #         for b in bitlist:
+    #             tag2 = v.tag | b
+    #             stag2 = tag2.to01()
+    #             if tags.has_key(stag2):
+    #                 c1 = uf.find(v.id)
+    #                 for t in tags[stag2]:
+    #                     c2 = uf.find(t.id)
+    #                     if c1.id != c2.id:
+    #                         uf.union(c1.id, c2.id)
+
+    # def bitvariation(self, baseBits, blen):
+    #     newBits = []
+    #     for b in baseBits:
+    #         for i in xrange(blen):
+    #             nextBit = copy.copy(b)
+    #             nextBit[i] = 1
+    #             if nextBit == b:
+    #                 pass
+    #             else:
+    #                 newBits.append(nextBit)
+
+    #     return newBits
+
     def hamming_distance(self, s1, s2):
         """
         https://pythonadventures.wordpress.com/2010/10/19/hamming-distance/
@@ -157,7 +337,7 @@ def main():
         #hdb = m.hamming_distance_bitwise(bitarray("1010"), bitarray("1001"))
 
         start = timer()
-        ms, cl = m.run(g, 3)
+        ms, cl = m.run3(g, 3)
         res = cl.clusters
         end = timer()
 
