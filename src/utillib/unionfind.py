@@ -15,9 +15,9 @@ class union_find:
 
     class entry:
         def __init__(self, id):
-            self._rank = 0
-            self._parent = None
-            self._id = id
+            self.rank = 0
+            self.parent = None
+            self.id = id
 
         @property
         def rank(self):
@@ -59,9 +59,11 @@ class union_find:
                 e = self.data[i]
 
             p = e.parent
-            done = p is None
+            done = p is None or p == i
             if not done:
                 i = p
+            elif p == 1:
+                e.parent = None
 
 
         return e
@@ -98,38 +100,6 @@ def main():
     uf.union(5,6)
     uf.union(3,4)
     uf.union(1,5)
-
-
-
-    # iterate over the test cases
-    for t in tests:
-        # load the graph data (while timing it)
-        start = timer()
-        g = graph()
-        g.load_data2(t[0], verbose=True, delim=" ")
-        end = timer()
-        print "loaded {0} in {1} secs".format(t[0], end - start)
-
-        m = greedy_clustering()
-
-        start = timer()
-        res = m.run(g, 4)
-        end = timer()
-
-        print "mst of {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start))
-        print res
-        #print tree
-
-        expected = t[1]
-        ok = len(expected) == 0 or res == expected[0]
-        if not ok:
-            print "ERROR! Expected {0}".format(expected[0])
-        else:
-            print "OK"
-            tests_correct += 1
-
-    print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests) * 2, (tests_correct / (len(tests) * 2)) * 100)
-
 
 if __name__ == "__main__":
     main()

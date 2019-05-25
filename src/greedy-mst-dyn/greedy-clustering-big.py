@@ -148,12 +148,14 @@ class greedy_clustering_hamming:
         # create the 1-3 distance versions of all tags
         start = timer()
         tagvariations = {}
+        ttc = 0
         for i in g.vertices:
             v = g.vertices[i]
-            tagvariations[v.tag.to01()] = self.build_tag_variations(v)
+            tagvariations[v.tag.to01()], tc = self.build_tag_variations(v)
+            ttc += tc
         end = timer()
         if verbose:
-            print "tag variations created in {0} secs".format(end - start)
+            print "tag variations {1} created in {0} secs ({2} per tag)".format(end - start, ttc, tc)
 
         # now do the clustering...
         self.cluster_by_tag(g, tags, tagvariations, uf, verbose)
@@ -167,7 +169,7 @@ class greedy_clustering_hamming:
         for d in xrange(3):
 
             if verbose:
-                print "working on distance {0}. current clusters: {1}".format(d+1, uf.clusters)
+                print "working on distance {0} - current clusters: {1}".format(d, uf.clusters)
 
             # Loop over the vertices O(n)
             for i in g.vertices:
@@ -180,15 +182,24 @@ class greedy_clustering_hamming:
                 for t in tv[d]:
                     stag = t.to01()
                     if tags.has_key(stag):
-                        c1 = uf.find(v.id)
-                        for t in tags[stag]:
-                            c2 = uf.find(t.id)
-                            if c1.id != c2.id:
-                                uf.union(c1.id, c2.id)
+                        for vt in tags[stag]:
+                            c1 = uf.find(v.id)
+                            if v.id == vt.id:
+                                pass
+                            else:
+                                c2 = uf.find(vt.id)
+                                if c1.id != c2.id:
+                                    #uf.union(c1.id, c2.id)
+                                    uf.union(v.id, vt.id)
 
     def build_tag_variations(self, v):
 
         tagvariations = []
+        tc = 0
+
+        # array of distance = 0 tags
+        bitlist0 = []
+        tagvariations.append(bitlist0)
 
         # array of distance = 1 tags
         bitlist1 = []
@@ -199,12 +210,16 @@ class greedy_clustering_hamming:
         tagvariations.append(bitlist2)
 
         # array of distance = 3 tags
-        bitlist3 = []
-        tagvariations.append(bitlist3)
+        #bitlist3 = []
+        #tagvariations.append(bitlist3)
 
         # array of distance = 3 tags
-        bitlist4 = []
-        tagvariations.append(bitlist4)
+        #bitlist4 = []
+        #tagvariations.append(bitlist4)
+
+        # add the tag itself to handle duplicates
+        bitlist0.append(v.tag)
+        tc += 1
 
         # for each bit in the tag
         for b1 in xrange(len(v.tag)):
@@ -216,6 +231,7 @@ class greedy_clustering_hamming:
 
             # save it
             bitlist1.append(bt1)
+            tc += 1
 
             for b2 in xrange(b1 + 1, len(v.tag)):
                 bt2 = copy.copy(bt1)
@@ -225,26 +241,29 @@ class greedy_clustering_hamming:
 
                 # save it
                 bitlist2.append(bt2)
+                tc += 1
 
-                for b3 in xrange(b2 + 1, len(v.tag)):
-                    bt3 = copy.copy(bt2)
+                # for b3 in xrange(b2 + 1, len(v.tag)):
+                #     bt3 = copy.copy(bt2)
 
-                    # flip a bit
-                    bt3[b3] = not bt3[b3]
+                #     # flip a bit
+                #     bt3[b3] = not bt3[b3]
 
-                    # save it
-                    bitlist3.append(bt3)
+                #     # save it
+                #     bitlist3.append(bt3)
+                #     tc += 1
 
-                    for b4 in xrange(b3 + 1, len(v.tag)):
-                        bt4 = copy.copy(bt3)
+                    # for b4 in xrange(b3 + 1, len(v.tag)):
+                    #     bt4 = copy.copy(bt3)
 
-                        # flip a bit
-                        bt4[b4] = not bt4[b4]
+                    #     # flip a bit
+                    #     bt4[b4] = not bt4[b4]
 
-                        # save it
-                        bitlist4.append(bt4)
+                    #     # save it
+                    #     bitlist4.append(bt4)
+                    #     tc += 1
 
-        return tagvariations
+        return tagvariations, tc
 
     # def clusterbits(self, g, tags, uf, bitlist):
     #     for i in g.vertices:
@@ -314,7 +333,7 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment2Clustering\\question2")
@@ -322,10 +341,11 @@ def main():
 
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering_big.txt", [106]))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\greedy_clustering_big.txt", [6118]))
 
     # iterate over the test cases
-    for t in tests:
+    tid = 0
+    for t in tests: #[18:19]
         # load the graph data (while timing it)
         start = timer()
         g = graph()
@@ -341,7 +361,7 @@ def main():
         res = cl.clusters
         end = timer()
 
-        print "mst of {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start))
+        print "[{3}] mst of {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start), tid)
         print res
         #print tree
 
@@ -352,6 +372,9 @@ def main():
         else:
             print "OK"
             tests_correct += 1
+
+        # increment test id
+        tid += 1
 
     print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests), (tests_correct / (len(tests))) * 100)
 
