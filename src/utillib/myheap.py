@@ -9,8 +9,8 @@ class heapqplus:
         self._counter = itertools.count()
         self.REMOVED = '<removed-task>'      # placeholder for a removed task
 
-    #def heapify(self, arr):
-    #    self._heap = heapq.heapify(arr)
+    def __len__(self):
+        return len(self._heap)
 
     def add(self, item, priority):
         'Add a new task or update the priority of an existing task'

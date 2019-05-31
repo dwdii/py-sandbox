@@ -9,12 +9,12 @@ from __future__ import division
 __author__ = 'Daniel Dittenhafer'
 import collections
 import copy
-import heapq
 import itertools
 import os
 import sys
 from timeit import default_timer as timer
 from src.utillib.graph import graph, vertex, edge
+from src.utillib.myheap import heapqplus
 """
 Your task in this problem is to run the Huffman coding algorithm from
 lecture on this data set. What is the maximum length of a codeword in
@@ -44,17 +44,17 @@ class huffman_coder:
         g = graph()
 
         # create the n leaves
-        roots = []
+        roots = heapqplus()
         for a in self._alphabet:
             v = vertex(a[0])
             v.tag = a[1]
-            roots.append(v)
+            roots.add(v, v.tag)
             g.vertices[v.id] = v
 
         i = 0
         while len(roots) > 1:
-            v = roots[0]
-            v2 = roots[1]
+            _, v = roots.pop()
+            _, v2 = roots.pop()
             nr = vertex(str(v.id) + '^' + str(v2.id))
 
             e0 = edge(v2, nr, 0)
@@ -67,11 +67,11 @@ class huffman_coder:
             nr.edges.append(e1)
             nr.tag = v.tag + v2.tag
 
-            roots.remove(v)
-            roots.remove(v2)
-            roots.append(nr)
+            #roots.remove(v)
+            #roots.remove(v2)
+            roots.add(nr, nr.tag)
 
-            roots.sort(key=lambda a: a.tag)
+            #roots.sort(key=lambda a: a.tag)
 
 
         # Walk up from lowest to root to count depth
@@ -183,7 +183,7 @@ def main():
             print "OK"
             tests_correct += 1
 
-    print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests) * 2, (tests_correct / (len(tests) * 2)) * 100)
+    print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests), (tests_correct / (len(tests))) * 100)
 
 
 if __name__ == "__main__":
