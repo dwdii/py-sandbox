@@ -148,13 +148,13 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment3HuffmanAndMWIS\\question1And2")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\dyn-huffman.txt", [-3612829]))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\dyn-huffman.txt", [19,9]))
 
     # iterate over the test cases
     for t in tests:
