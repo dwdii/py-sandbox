@@ -77,6 +77,37 @@ class knapsack:
 
         return res
 
+    def run_recursive(self, verbose=False):
+
+        n = len(self._items) - 1
+        self._A = {}
+
+        res = self.subrecurse(n, self._knapsackSize)
+
+        return res
+
+    def subrecurse(self, i, x):
+        k = "{0}:{1}".format(i, x)
+        if i <= 0 or x <= 0:
+            return 0
+        elif self._A.has_key(k):
+            Ai = self._A[k]
+        else:
+            _, vi, wi = self._items[i]
+            #wi = item[2]
+            #vi = item[1]
+
+            Ai_1x = self.subrecurse(i-1, x)
+            if x >= wi:
+                opts = [ Ai_1x, self.subrecurse(i-1, x-wi) + vi]
+                maxVal = max(opts)
+                Ai = maxVal
+            else:
+                Ai = Ai_1x
+
+            self._A[k] = Ai
+
+        return Ai
 
     def load_data(self, path):
         """Load items in tuples of (id, value, weight)"""
@@ -129,13 +160,18 @@ def load_stanford_algs_test_cases(tests, test_cases_folder):
 
 def main():
 
+    print "Old recurse list: {0}".format(sys.getrecursionlimit())
+    sys.setrecursionlimit(3000)
+    print "New recurse list: {0}".format(sys.getrecursionlimit())
+
+
     tests_correct = 0
     tests = [
         # path to graph file, finishing times dict, leaders dict
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = False
+    load_test_cases = True
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment4Knapsack")
@@ -144,17 +180,18 @@ def main():
     tests.append(("D:\\Code\\Python\\py-sandbox\\data\\dyn-knapsack1.txt", [2493893]))
 
     # iterate over the test cases
-    for t in tests:
+    ndx = 0
+    for t in tests[21:22]:
         m = knapsack()
 
         # load the graph data (while timing it)
         start = timer()
         m.load_data(t[0])
         end = timer()
-        print "loaded {0} in {1} secs".format(t[0], end - start)
+        print "[{2}] loaded {0} in {1} secs".format(t[0], end - start, ndx)
 
         start = timer()
-        res = m.run(True)
+        res = m.run_recursive(True)
         end = timer()
 
         print "knapsack value {0} in {1} secs = {2}/sec".format(res, end - start, len(m._items) / (end - start))
@@ -168,6 +205,8 @@ def main():
         else:
             print "OK"
             tests_correct += 1
+
+        ndx += 1
 
     print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests), (tests_correct / (len(tests))) * 100)
 
