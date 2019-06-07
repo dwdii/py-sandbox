@@ -173,17 +173,17 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course3\\assignment4Knapsack")
 
     # The real problem
-    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\dyn-knapsack1.txt", [2493893]))
+    tests.append(("../py-sandbox/data/dyn-knapsack_big.txt", [2493893]))
 
     # iterate over the test cases
     ndx = 0
-    for t in tests[10:11]:
+    for t in tests:
         m = knapsack()
 
         # load the graph data (while timing it)
