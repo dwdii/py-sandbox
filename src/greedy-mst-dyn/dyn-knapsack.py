@@ -13,8 +13,8 @@ import itertools
 import os
 import sys
 from timeit import default_timer as timer
-from src.utillib.graph import graph, vertex, edge
-from src.utillib.myheap import heapqplus
+#from src.utillib.graph import graph, vertex, edge
+#from src.utillib.myheap import heapqplus
 """
 In this programming problem and the next you'll code up the knapsack algorithm
 from lecture.
@@ -183,7 +183,7 @@ def main():
 
     # iterate over the test cases
     ndx = 0
-    for t in tests[21:30]:
+    for t in tests[10:11]:
         m = knapsack()
 
         # load the graph data (while timing it)
