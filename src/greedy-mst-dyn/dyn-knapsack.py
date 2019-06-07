@@ -87,10 +87,12 @@ class knapsack:
         return res
 
     def subrecurse(self, i, x):
-        k = "{0}:{1}".format(i, x)
-        if i <= 0 or x <= 0:
+
+        if i < 0 or x <= 0:
             return 0
-        elif self._A.has_key(k):
+
+        k = "{0}:{1}".format(i, x)
+        if self._A.has_key(k):
             Ai = self._A[k]
         else:
             _, vi, wi = self._items[i]
@@ -181,7 +183,7 @@ def main():
 
     # iterate over the test cases
     ndx = 0
-    for t in tests[21:22]:
+    for t in tests[21:30]:
         m = knapsack()
 
         # load the graph data (while timing it)
