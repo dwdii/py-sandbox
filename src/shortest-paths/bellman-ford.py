@@ -14,7 +14,7 @@ import os
 import sys
 from timeit import default_timer as timer
 from src.utillib.graph import graph, vertex, edge
-from src.utillib.myheap import heapqplus
+#from src.utillib.myheap import heapqplus
 
 """
 In this assignment you will implement one or more algorithms for the all-pairs
@@ -42,13 +42,43 @@ graphs have no negative-cost cycles, then enter the smallest of the lengths of
 their shortest shortest paths in the box below.
 """
 
-class floyd_warshall:
+class bellman_ford:
 
     def __init__(self):
         pass
-    
-    def run(self, verbose=False):
-        pass
+
+    def run(self, g, s, verbose=False):
+
+        L = {}
+
+        # Loop over i edge budget
+        for i in xrange(len(g.vertices)):
+            # All vertices
+            for id in g.vertices:
+                v = g.vertices[id]
+                if i == 0:
+
+                    if not L.has_key(i):
+                        L[i] = {}
+
+                    if v.id == s.id:
+                        L[i][v.id] = 0
+                    else:
+                        L[i][v.id] = 18446744073709551615
+                else:
+                    Lwv = []
+                    for id2 in g.vertices:
+                        w = g.vertices[id2]
+                        Lwv.append(L[i-1][w.id] + w.get_edge(v.id).weight)
+                    ch = [
+                            L[i-1][v.id],
+                            min(Lwv)
+                         ]
+                    L[i][v.id] = min(ch)
+
+
+
+
 
 def load_stanford_algs_test_cases(tests, test_cases_folder):
 
@@ -63,9 +93,7 @@ def load_stanford_algs_test_cases(tests, test_cases_folder):
         output = []
         for p in expected_out:
             if len(p) > 0:
-                op = int(p)
-                if op != 0:
-                     output.append(op)
+                output.append(p)
 
         tests.append((test_cases_folder + "\\" + filename, output))
 
@@ -78,7 +106,7 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = False
+    load_test_cases = True
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment1AllPairsShortestPath")
@@ -90,17 +118,20 @@ def main():
 
     # iterate over the test cases
     for t in tests:
-        m = floyd_warshall()
+        m = bellman_ford()
 
         # load the graph data (while timing it)
         start = timer()
-        m.load_data(t[0])
+        g = graph()
+        g.load_data4(t[0])
         end = timer()
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
+        # make ghost vertex and edges....
+        s = vertex(max(g.vertices) + 1)
 
         start = timer()
-        res, res2, g = m.run(True)
+        res, res2, g = m.run(g, s, True)
         end = timer()
 
         print "huffman code max bits of {0} / min bits of {3} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start), res2)

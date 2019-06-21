@@ -55,6 +55,13 @@ class vertex:
     def __repr__(self):
         return str(self)
 
+    def get_edge(self, id):
+        for e in self.edges:
+            if e[0].id == id or e[1].id == id:
+                return e
+
+        return None
+
 class edge:
 
     def __init__(self, tail, head, weight=1):
@@ -268,3 +275,51 @@ class graph:
                         self._nodes[v] = vo
 
 
+    def load_data4(self, path, verbose = False, delim=' '):
+        """
+            Loads a file describing an directed graph with integer edge costs, formated as:
+
+            [number_of_nodes] [number_of_edges]
+            [tail_of_edge_1] [head_of_edge_1] [edge_1_cost]
+            [tail_of_edge_2] [head_node_of_edge_2] [edge_2_cost]
+            ...
+        """
+        if verbose:
+            print "loading " + path
+
+        with open(path) as fp:
+            lines = fp.read().split("\n")
+
+            # We aren't using the header, so strip it off.
+            # The header would have a vertices edges pair.
+            lines = lines[1:]
+
+            for l in lines:
+
+                if len(l.strip()) > 0:
+                    parts = l.split(delim)
+                    v = int(parts[0])
+
+                    #if v not in self._adjacencyList:
+                    #    self._adjacencyList[v] = {}
+
+                    if v not in self._nodes:
+                        self._nodes[v] = vertex(v)
+
+                    h = parts[1].strip()
+                    if len(h) > 0:
+                        h = int(h)
+                        weight = int(parts[2])
+
+                        #if h not in self._adjacencyList[v]:
+                        #    self._adjacencyList[v][h] = 1
+                        #    self._edges.append((v, h))
+
+                        if h not in self._nodes:
+                            self._nodes[h] = vertex(h)
+
+                        # Add new edge
+                        e = edge(self._nodes[v], self._nodes[h], weight)
+                        self._nodes[v].edges.append(e)
+                        self._nodes[h].incoming.append(e)
+                        self._edges.append(e)
