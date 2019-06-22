@@ -32,8 +32,8 @@ are negative. NOTE: These graphs may or may not have negative-cost cycles.
 Your task is to compute the "shortest shortest path". Precisely, you must first
 identify which, if any, of the three graphs have no negative cycles. For each
 such graph, you should compute all-pairs shortest paths and remember the
-smallest one (i.e., compute minu,v∈Vd(u,v), where d(u,v)d(u,v) denotes the
-shortest-path distance from uu to vv).
+smallest one (i.e., compute min u,v V d(u,v), where d(u,v) denotes the
+shortest-path distance from u to v).
 
 If each of the three graphs has a negative-cost cycle, then enter "NULL" in the
 box below. If exactly one graph has no negative-cost cycles, then enter the
@@ -136,15 +136,15 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment1AllPairsShortestPath")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g1.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g2.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g3.txt", []))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g1.txt", ['NULL']))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g2.txt", ['NULL']))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g3.txt", [-19]))
 
     # iterate over the test cases
     it = 0
