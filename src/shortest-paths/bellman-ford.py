@@ -45,40 +45,70 @@ their shortest shortest paths in the box below.
 class bellman_ford:
 
     def __init__(self):
+        self.infinity = 18446744073709551615
         pass
 
     def run(self, g, s, verbose=False):
 
         L = {}
+        lenV = len(g.vertices)
 
         # Loop over i edge budget
-        for i in xrange(len(g.vertices)):
+        for i in xrange(lenV + 1):
+            L[i] = {}
+
             # All vertices
             for id in g.vertices:
                 v = g.vertices[id]
                 if i == 0:
-
-                    if not L.has_key(i):
-                        L[i] = {}
-
                     if v.id == s.id:
                         L[i][v.id] = 0
                     else:
-                        L[i][v.id] = 18446744073709551615
+                        L[i][v.id] = self.infinity
                 else:
                     Lwv = []
-                    for id2 in g.vertices:
-                        w = g.vertices[id2]
-                        Lwv.append(L[i-1][w.id] + w.get_edge(v.id).weight)
+                    Lim1 = L[i-1]
+                    for ine in v.incoming:
+                        wid = ine.get_other_side(v.id)
+                        Lwv.append(Lim1[wid] + ine.weight)
+
+                    # Always consider the prior edge budget shortest path
                     ch = [
-                            L[i-1][v.id],
-                            min(Lwv)
+                            Lim1[v.id]
                          ]
+
+                    # and if there are other options, take the min of those
+                    if 0 < len(Lwv):
+                        ch.append(min(Lwv))
+
                     L[i][v.id] = min(ch)
 
+        # check for negative cost cycle
+        ncc = False
+        for id in g.vertices:
+            if L[lenV - 1][id] != L[lenV][id]:
+                ncc = True
+                break
 
+        last = L[lenV - 1]
+        if ncc:
+            sp = None
+        else:
+            sp = min(last.values())
 
+        return sp, last
 
+    def add_ghost_vertex(self, g):
+        s = vertex(max(g.vertices) + 1)
+        g.vertices[s.id] = s
+        for vid in g.vertices:
+            v = g.vertices[vid]
+            e = edge(s, v, 0)
+            g.edges.append(e)
+            s.edges.append(e)
+            v.incoming.append(e)
+
+        return s
 
 def load_stanford_algs_test_cases(tests, test_cases_folder):
 
@@ -117,6 +147,7 @@ def main():
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-g3.txt", []))
 
     # iterate over the test cases
+    it = 0
     for t in tests:
         m = bellman_ford()
 
@@ -128,18 +159,19 @@ def main():
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
         # make ghost vertex and edges....
-        s = vertex(max(g.vertices) + 1)
+        s = m.add_ghost_vertex(g)
 
         start = timer()
-        res, res2, g = m.run(g, s, True)
+        res, res2 = m.run(g, s, True)
         end = timer()
 
-        print "huffman code max bits of {0} / min bits of {3} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start), res2)
+        print "[{3}] bellman ford sp = {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start), it)
         print res, res2
-        #print tree
+        if res is None:
+            res = "NULL"
 
         expected = t[1]
-        ok = len(expected) == 0 or (res == expected[0] and res2 == expected[1])
+        ok = len(expected) == 0 or (str(res) == expected[0])
         if not ok:
             print "ERROR! Expected {0}".format(expected[0])
         else:
