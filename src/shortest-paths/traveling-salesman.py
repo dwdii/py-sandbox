@@ -43,31 +43,62 @@ https://www.youtube.com/watch?v=-JjA4BLQyqE
 class traveling_salesman:
 
     def __init__(self):
-        pass
+        self.infinity = 18446744073709551615
+
 
     def run(self, P, D, s, verbose=False):
         A = {}
         n = len(P)
-        for m in xrange(2, n):
-            mSets = list(itertools.permutations(P.keys(), m))
+
+        for p in P:
+            S = frozenset([p])
+            A[S] = {}
+            if p == s:
+                A[S][p] = D[s][p]
+            else:
+                A[S][p] = self.infinity
+
+        for m in xrange(2, n + 1):
+            mSets = list(itertools.combinations(P.keys(), m))
             for S in mSets:
-                if not S.contains(s):
+                fs = frozenset(S)
+                if s not in fs:
                     continue
 
-                A[S] = {}
-                for j in S:
+                A[fs] = {}
+                A[fs][1] = self.infinity
+
+                for j in fs:
                     if j == s:
                         continue
 
-                    candidates = [0] #[A[S-j][k] + Ckj]
-                    A[S][j] = min(candidates)
-        pass
+                    Sminusj = fs.difference(set([j]))
+                    candidates = []
+                    for k in fs:
+                        if k != j:
+                            candidates.append(A[Sminusj][k] + D[k][j])
 
-    def recurrence(self, A):
-        pass
+                    A[fs][j] = min(candidates)
 
+        final = []
+        fs = frozenset(P.keys())
+        for j in P:
+            if j == 1:
+                continue
+
+            final.append(A[fs][j] + D[j][1])
+
+        res = min(final)
+
+        return int(round(res-0.5))
 
     def load_data(self, f):
+        """Loads the graph from the file f.
+
+        Returns:
+            P dict of points as (x,y) tuples
+            D dict of distance dictionaries (matrix) from u to v (1 based)
+        """
         D = {}
         P = {}
         v = 1
@@ -128,7 +159,7 @@ def main():
 
     # iterate over the test cases
     it = 0
-    for t in tests[0:1]:
+    for t in tests:
         m = traveling_salesman()
 
         # load the graph data (while timing it)
@@ -138,11 +169,11 @@ def main():
         print "loaded {0} in {1} secs".format(t[0], end - start)
 
         start = timer()
-        res, res2 = m.run(P, D, 1, True)
+        res = m.run(P, D, 1, True)
         end = timer()
 
-        print "[{3}] bellman ford sp = {0} in {1} secs = {2}/sec".format(res, end - start, len(g.vertices) / (end - start), it)
-        print res, res2
+        print "[{3}] tsp = {0} in {1} secs = {2}/sec".format(res, end - start, len(P) / (end - start), it)
+        print res
         if res is None:
             res = "NULL"
 
