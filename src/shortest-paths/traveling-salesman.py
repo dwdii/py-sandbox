@@ -15,7 +15,7 @@ import math
 import os
 import sys
 from timeit import default_timer as timer
-from src.utillib.graph import graph, vertex, edge
+#from src.utillib.graph import graph, vertex, edge
 
 """
 In this assignment you will implement one or more algorithms for the traveling
@@ -49,6 +49,8 @@ class traveling_salesman:
     def run(self, P, D, s, verbose=False):
         A = {}
         n = len(P)
+        if verbose:
+            print "n: {0}".format(n)
 
         for p in P:
             S = frozenset([p])
@@ -59,8 +61,11 @@ class traveling_salesman:
                 A[S][p] = self.infinity
 
         for m in xrange(2, n + 1):
+            if verbose:
+                print "m: {0}".format(m)
             mSets = list(itertools.combinations(P.keys(), m))
             for S in mSets:
+                #print "S: {0}".format(S)
                 fs = frozenset(S)
                 if s not in fs:
                     continue
@@ -149,13 +154,13 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment2TSP")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-path-tsp.txt", ['NULL']))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-path-tsp.txt", ['NULL']))
 
     # iterate over the test cases
     it = 0
@@ -184,6 +189,8 @@ def main():
         else:
             print "OK"
             tests_correct += 1
+
+        it += 1
 
     print "{0} of {1} tests passed = {2}%".format(tests_correct, len(tests), (tests_correct / (len(tests))) * 100)
 
