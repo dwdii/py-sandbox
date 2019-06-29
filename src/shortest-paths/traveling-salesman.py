@@ -36,6 +36,38 @@ In the box below, type in the minimum cost of a traveling salesman tour for
 this instance, rounded down to the nearest integer.
 
 https://www.youtube.com/watch?v=-JjA4BLQyqE
+
+loaded tsp.txt in 0.0170431137085 secs
+n: 25
+m: 2
+m: 3
+m: 4
+m: 5
+m: 6
+m: 7
+m: 8
+m: 9
+m: 10
+m: 11
+m: 12
+m: 13
+m: 14
+m: 15
+m: 16
+m: 17
+m: 18
+m: 19
+m: 20
+m: 21
+m: 22
+m: 23
+m: 24
+m: 25
+[0] tsp = 26442 in 1313.1338439 secs = 0.0190384248461/sec
+26442
+OK
+1 of 1 tests passed = 100.0%
+
 """
 
 
