@@ -10,6 +10,7 @@ __author__ = 'Daniel Dittenhafer'
 import collections
 import copy
 import decimal
+import src.utillib.myheap
 import itertools
 import math
 import os
@@ -53,14 +54,24 @@ class traveling_salesman_nn:
 
             nd = self.infinity
             ni = 0
-            for p in remaining:
+            #start = timer()
+            #for p in remaining:
+            #    if visited.has_key(p):
+            #        continue
+            #    else:
+            #        cd = D[ci][p]
+            #        if cd < nd:
+            #            ni = p
+            #            nd = cd
+            found = False
+            while not found:
+                cd, p = D[ci].pop()
                 if visited.has_key(p):
                     continue
                 else:
-                    cd = D[ci][p]
-                    if cd < nd:
-                        ni = p
-                        nd = cd
+                    ni = p
+                    nd = math.sqrt(cd)
+                    found = True
 
             total += nd
             visited[ni] = 1
@@ -69,9 +80,13 @@ class traveling_salesman_nn:
             if len(remaining) == 0:
                 done = True
 
+            #end = timer()
+            #print "Visited: {0} in {1} secs".format(len(visited), end - start)
+
         # Go back to source
-        cd = D[ci][s]
-        total += cd
+        #cd = D[ci][s]
+        cd = D[ci].remove(s)
+        total += math.sqrt(cd)
 
         return int(round(total-0.5))
 
@@ -95,14 +110,20 @@ class traveling_salesman_nn:
 
 
         for p in P:
-            D[p] = {}
+            #D[p] = {}
+            D[p] = src.utillib.myheap.heapqplus()
             p1 = P[p]
+            #start = timer()
             for d in P:
-                #if d == p:
-                #    continue
-                #else:
                 p2 = P[d]
-                D[p][d] = math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
+                #ed = math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
+                ed = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
+                D[p].add(d, ed)
+                #D[p][d] =
+
+            #end = timer()
+            #print "Distances for {0} computed in {1} secs".format(p, end - start)
+
 
         return P, D
 
@@ -142,7 +163,7 @@ def main():
 
     # iterate over the test cases
     it = 0
-    for t in tests: # passed 50 (56_4000)
+    for t in tests[0:]: # passed 50 (56_4000)
         m = traveling_salesman_nn()
 
         # load the graph data (while timing it)
