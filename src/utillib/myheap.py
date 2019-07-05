@@ -46,6 +46,12 @@ class heapqplus:
         entry[-1] = self.REMOVED
         return entry[0]
 
+    def get(self, task):
+        if task in self._entry_finder:
+            return self._entry_finder[task][0]
+        else:
+            return None
+
     def pop(self):
         'Remove and return the lowest priority task. Raise KeyError if empty.'
         while self._heap:
