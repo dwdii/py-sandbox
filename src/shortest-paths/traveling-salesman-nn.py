@@ -115,9 +115,15 @@ class traveling_salesman_nn:
             p1 = P[p]
             #start = timer()
             for d in P:
-                p2 = P[d]
-                #ed = math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
-                ed = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
+                ed = None
+                if D.has_key(d):
+                    ed = D[d].get(p)
+
+                if ed is None:
+                    p2 = P[d]
+                    #ed = math.sqrt(math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2))
+                    ed = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
+
                 D[p].add(d, ed)
                 #D[p][d] =
 
