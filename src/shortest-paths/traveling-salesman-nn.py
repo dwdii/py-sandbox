@@ -40,6 +40,7 @@ class traveling_salesman_nn:
     def run(self, P, D, s, verbose=False):
 
         total = 0
+        compute_distance = len(D) == 0
 
         visited = {}
         visited[s] = 1
@@ -54,19 +55,26 @@ class traveling_salesman_nn:
 
             nd = self.infinity
             ni = 0
+            p1 = P[ci]
+
             #start = timer()
             for p in remaining:
-                ip = p - 1
-                if visited.has_key(p):
-                    continue
-                else:
-                    cd = D[ci][ip]
-                    if cd < nd:
-                        ni = p
-                        nd = cd
+                #ip = p - 1
+                #if visited.has_key(p):
+                #    continue
+                #else:
+                #    if compute_distance:
+                p2 = P[p]
+                cd = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
+                 #   else:
+                 #       cd = D[ci][ip]
+
+                if cd < nd:
+                    ni = p
+                    nd = cd
 
             total += math.sqrt(nd)
-            visited[ni] = 1
+#            visited[ni] = 1
             remaining.remove(ni)
             ci = ni
             if len(remaining) == 0:
@@ -76,13 +84,16 @@ class traveling_salesman_nn:
             #print "Visited: {0} in {1} secs".format(len(visited), end - start)
 
         # Go back to source
-        cd = D[ci][s - 1]
+        #cd = D[ci][s - 1]
         #cd = D[ci].remove(s)
+        p1 = P[ci]
+        p2 = P[s]
+        cd = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
         total += math.sqrt(cd)
 
         return int(round(total-0.5))
 
-    def load_data(self, f):
+    def load_data(self, f, compute_distances = False):
         """Loads the graph from the file f.
 
         Returns:
@@ -100,20 +111,19 @@ class traveling_salesman_nn:
                     P[v] = (float(parts[1]), float(parts[2]))
                     v += 1
 
+        if compute_distances:
+            for p in P:
+                D[p] = []
+                #D[p] = src.utillib.myheap.heapqplus()
+                p1 = P[p]
+                #start = timer()
+                for d in xrange(1, len(P) + 1):
+                    p2 = P[d]
+                    ed = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
+                    D[p].append(ed)
 
-        for p in P:
-            D[p] = []
-            #D[p] = src.utillib.myheap.heapqplus()
-            p1 = P[p]
-            #start = timer()
-            for d in xrange(1, len(P) + 1):
-                p2 = P[d]
-                ed = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
-                D[p].append(ed)
-
-            #end = timer()
-            #print "Distances for {0} computed in {1} secs".format(p, end - start)
-
+                #end = timer()
+                #print "Distances for {0} computed in {1} secs".format(p, end - start)
 
         return P, D
 
@@ -152,8 +162,8 @@ def main():
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-path-nn.txt", ['NULL']))
 
     # iterate over the test cases
-    it = 0
-    for t in tests[0:]: # passed 50 (56_4000)
+    it = 56
+    for t in tests[it:]: # passed 50 (56_4000)
         m = traveling_salesman_nn()
 
         # load the graph data (while timing it)
