@@ -40,10 +40,10 @@ class traveling_salesman_nn:
     def run(self, P, D, s, verbose=False):
 
         total = 0
-        compute_distance = len(D) == 0
+        #compute_distance = len(D) == 0
 
-        visited = {}
-        visited[s] = 1
+        #visited = {}
+        #visited[s] = 1
 
         ci = s
 
@@ -54,27 +54,18 @@ class traveling_salesman_nn:
         while not done:
 
             nd = self.infinity
-            ni = 0
+            #ni = 0
             p1 = P[ci]
 
             #start = timer()
             for p in remaining:
-                #ip = p - 1
-                #if visited.has_key(p):
-                #    continue
-                #else:
-                #    if compute_distance:
                 p2 = P[p]
                 cd = math.pow(p1[0] - p2[0], 2) + math.pow(p1[1] - p2[1], 2)
-                 #   else:
-                 #       cd = D[ci][ip]
-
                 if cd < nd:
                     ni = p
                     nd = cd
 
             total += math.sqrt(nd)
-#            visited[ni] = 1
             remaining.remove(ni)
             ci = ni
             if len(remaining) == 0:
@@ -114,7 +105,6 @@ class traveling_salesman_nn:
         if compute_distances:
             for p in P:
                 D[p] = []
-                #D[p] = src.utillib.myheap.heapqplus()
                 p1 = P[p]
                 #start = timer()
                 for d in xrange(1, len(P) + 1):
@@ -153,16 +143,16 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment3TSPHeuristic")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-path-nn.txt", ['NULL']))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\shortest-path-nn.txt", [1203406]))
 
     # iterate over the test cases
-    it = 56
+    it = 0
     for t in tests[it:]: # passed 50 (56_4000)
         m = traveling_salesman_nn()
 
