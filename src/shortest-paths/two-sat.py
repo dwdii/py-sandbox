@@ -46,12 +46,11 @@ class papadimitrious :
         for i in xrange(log2N):
             # create a random starting point
             num = random.getrandbits(n)
-            bits = n #int(max(8, math.log(num, 2)+1))
-            out = [1 if num & (1 << (bits-1-b)) else 0 for b in range(bits)]
+            bits = [1 if num & (1 << (n-1-b)) else 0 for b in range(n)]
 
             # iterate from the random starting point
             for j in xrange(twoN2):
-                if self.is_satisfied(out, P):
+                if self.is_satisfied(bits, P):
                     return True
             else:
                 # pick a clause to make true
@@ -61,25 +60,28 @@ class papadimitrious :
 
         return False
 
+    def is_clause_satisfied(self, bits, clause):
+        ndx1 = clause[1] - 1
+        ndx2 = clause[3] - 1
+        if clause[0]:
+            # not
+            x1 = not bits[ndx1]
+        else:
+            x1 = bits[ndx1]
+
+        if clause[1]:
+            # not
+            x2 = not bits[ndx2]
+        else:
+            x2 = bits[ndx2]
+
+        return (x1 or x2)
+
 
     def is_satisfied(self, bits, P):
 
         for p in P:
-            ndx1 = abs(p[0]) - 1
-            ndx2 = abs(p[1]) - 1
-            if p[0] < 0:
-                # not
-                x1 = not bits[ndx1]
-            else:
-                x1 = bits[ndx1]
-
-            if p[1] < 0:
-                # not
-                x2 = not bits[ndx2]
-            else:
-                x2 = bits[ndx2]
-
-            if not (x1 or x2):
+            if not self.is_clause_satisfied(bits, p):
                 return False
 
         return True
@@ -98,7 +100,16 @@ class papadimitrious :
             for line in lines[1:]:
                 if(len(line.strip()) > 0):
                     parts = line.split(" ")
-                    P.append( (int(parts[0]), int(parts[1]) ) )
+                    p1 = int(parts[0])
+                    n1 = False
+                    if p1 < 0:
+                        n1 = True
+                    p2 = int(parts[1])
+                    n2 = False
+                    if p2 < 0:
+                        n2 = True
+
+                    P.append( (n1, abs(p1), n2, abs(p2) ) )
 
         return c, P
 
