@@ -41,41 +41,73 @@ class papadimitrious :
 
     def run(self, n, P, verbose=False):
 
-        twoN2 = int(2 * math.pow(n, 2))
+        nminus1 = n - 1
+        bitlist = [1, 3]
         log2N = int(math.log(n, 2))
+        twoN2 = long(2 * math.pow(n, 2))
         for i in xrange(log2N):
             # create a random starting point
             num = random.getrandbits(n)
-            bits = [1 if num & (1 << (n-1-b)) else 0 for b in range(n)]
+            bits = [True if num & (1 << (n-1-b)) else False for b in range(n)]
 
             # iterate from the random starting point
-            for j in xrange(twoN2):
+            for j in self.custom_range(twoN2):
                 if self.is_satisfied(bits, P):
                     return True
-            else:
-                # pick a clause to make true
-                cmt = random.randint(n)
-                #P[cmt]
+                else:
+                    # pick a clause to make true
+                    cmt = random.randint(0, nminus1)
+                    while self.is_clause_satisfied(bits, P[cmt]):
+                        cmt = random.randint(0, nminus1)
 
+                    clause = P[cmt]
+                    ntf = random.sample(bitlist,1)[0]
+                    bits[clause[ntf]] = not bits[clause[ntf]]
+                    # if clause[0] and bits[clause[1] - 1]:
+                    #     # Not'd clause, but our current val is true, so flip it
+                    #     bits[clause[1] - 1] = False
+                    # elif not clause[0] and not bits[clause[1] - 1]:
+                    #     # Reg clause, but our current val is false, so flip it
+                    #     bits[clause[1] - 1] = True
+                    # elif clause[2] and bits[clause[3] - 1]:
+                    #     # Not'd clause, but our current val is true, so flip it
+                    #     bits[clause[3] - 1] = False
+                    # elif not clause[2] and not bits[clause[3] - 1]:
+                    #     # Reg clause, but our current val is false, so flip it
+                    #     bits[clause[3] - 1] = True
 
         return False
 
+    def custom_range(self, start=0,stop=None,step=1):
+        """xrange in python 2.7 fails on numbers larger than C longs.
+        we write a custom version
+        https://stackoverflow.com/a/20008924/2604144
+        """
+        if stop is None:
+            #handle single argument case. ugly...
+            stop = start
+            start = 0
+        i = start
+        while i < stop:
+            yield i
+            i += step
+
     def is_clause_satisfied(self, bits, clause):
-        ndx1 = clause[1] - 1
-        ndx2 = clause[3] - 1
+        ndx1 = clause[1]# - 1
+        ndx2 = clause[3]# - 1
         if clause[0]:
             # not
             x1 = not bits[ndx1]
         else:
             x1 = bits[ndx1]
 
-        if clause[1]:
+        if clause[2]:
             # not
             x2 = not bits[ndx2]
         else:
             x2 = bits[ndx2]
 
-        return (x1 or x2)
+        return x1 or x2
 
 
     def is_satisfied(self, bits, P):
@@ -109,7 +141,7 @@ class papadimitrious :
                     if p2 < 0:
                         n2 = True
 
-                    P.append( (n1, abs(p1), n2, abs(p2) ) )
+                    P.append( (n1, abs(p1) - 1, n2, abs(p2) - 1 ) )
 
         return c, P
 
@@ -126,7 +158,7 @@ def load_stanford_algs_test_cases(tests, test_cases_folder):
         output = []
         for p in expected_out:
             if len(p) > 0:
-                output.append(p)
+                output.append(p == '1')
 
         tests.append((test_cases_folder + "\\" + filename, output))
 
@@ -145,12 +177,12 @@ def main():
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment4TwoSat")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\1-2sat.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat1.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat2.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat3.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat4.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat5.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat6.txt", []))
 
     # iterate over the test cases
     it = 0
@@ -174,7 +206,7 @@ def main():
             res = "NULL"
 
         expected = t[1]
-        ok = len(expected) == 0 or (str(res) == expected[0])
+        ok = len(expected) == 0 or (str(res) == str(expected[0]))
         if not ok:
             print "ERROR! Expected {0}".format(expected[0])
         else:
