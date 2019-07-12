@@ -14,6 +14,7 @@ import decimal
 #import src.utillib.myheap
 import itertools
 import math
+import multiprocessing
 import os
 import random
 import sys
@@ -25,7 +26,7 @@ the number of clauses is the same, and this number is specified on the first
  line of the file. Each subsequent line specifies a clause via its two
  literals, with a number denoting the variable and a "-" sign denoting logical
  "not". For example, the second line of the first data file is "-16808 75250",
- which indicates the clause ¬x16808∨x75250.
+ which indicates the clause x_16808 V x_75250.
 
 Your task is to determine which of the 6 instances are satisfiable, and which
 are unsatisfiable. In the box below, enter a 6-bit string, where the ith bit
@@ -38,6 +39,7 @@ class papadimitrious :
 
     def __init__(self):
         self.infinity = 18446744073709551615
+        self.bits = []
 
     def run(self, n, P, verbose=False):
 
@@ -48,33 +50,20 @@ class papadimitrious :
         for i in xrange(log2N):
             # create a random starting point
             num = random.getrandbits(n)
-            bits = [True if num & (1 << (n-1-b)) else False for b in range(n)]
+            self._bits = [True if num & (1 << (n-1-b)) else False for b in range(n)]
 
             # iterate from the random starting point
             for j in self.custom_range(twoN2):
-                if self.is_satisfied(bits, P):
+                is_sat, unsats = self.is_satisfied(P)
+                if is_sat:
                     return True
                 else:
                     # pick a clause to make true
-                    cmt = random.randint(0, nminus1)
-                    while self.is_clause_satisfied(bits, P[cmt]):
-                        cmt = random.randint(0, nminus1)
+                    cmt = random.sample(unsats, 1)[0]
 
                     clause = P[cmt]
                     ntf = random.sample(bitlist,1)[0]
-                    bits[clause[ntf]] = not bits[clause[ntf]]
-                    # if clause[0] and bits[clause[1] - 1]:
-                    #     # Not'd clause, but our current val is true, so flip it
-                    #     bits[clause[1] - 1] = False
-                    # elif not clause[0] and not bits[clause[1] - 1]:
-                    #     # Reg clause, but our current val is false, so flip it
-                    #     bits[clause[1] - 1] = True
-                    # elif clause[2] and bits[clause[3] - 1]:
-                    #     # Not'd clause, but our current val is true, so flip it
-                    #     bits[clause[3] - 1] = False
-                    # elif not clause[2] and not bits[clause[3] - 1]:
-                    #     # Reg clause, but our current val is false, so flip it
-                    #     bits[clause[3] - 1] = True
+                    self._bits[clause[ntf]] = not self._bits[clause[ntf]]
 
         return False
 
@@ -92,31 +81,37 @@ class papadimitrious :
             yield i
             i += step
 
-    def is_clause_satisfied(self, bits, clause):
+    def is_clause_satisfied(self, clause):
         ndx1 = clause[1]# - 1
         ndx2 = clause[3]# - 1
         if clause[0]:
             # not
-            x1 = not bits[ndx1]
+            x1 = not self._bits[ndx1]
         else:
-            x1 = bits[ndx1]
+            x1 = self._bits[ndx1]
 
         if clause[2]:
             # not
-            x2 = not bits[ndx2]
+            x2 = not self._bits[ndx2]
         else:
-            x2 = bits[ndx2]
+            x2 = self._bits[ndx2]
 
         return x1 or x2
 
 
-    def is_satisfied(self, bits, P):
+    def is_satisfied(self, P):
 
-        for p in P:
-            if not self.is_clause_satisfied(bits, p):
-                return False
+        is_sat = True
+        unsats = []
+        i = 0
+        for i in xrange(len(P)):
+            ics = self.is_clause_satisfied(P[i])
+            is_sat = is_sat and ics
+            if not ics:
+                unsats.append(i)
 
-        return True
+
+        return is_sat, unsats
 
 
     def load_data(self, f, compute_distances = False):
