@@ -41,16 +41,21 @@ class papadimitrious :
         self.infinity = 18446744073709551615
         self.bits = []
 
-    def run(self, n, P, verbose=False):
+    def run(self, n, P, mi, verbose=False):
 
-        nminus1 = n - 1
+        print "Clauses: {0}".format(len(P))
+        print "Vars: {0}".format(n)
+
+        if len(P) == 0:
+            return True
+
         bitlist = [1, 3]
         log2N = int(math.log(n, 2))
         twoN2 = long(2 * math.pow(n, 2))
         for i in xrange(log2N):
             # create a random starting point
-            num = random.getrandbits(n)
-            self._bits = [True if num & (1 << (n-1-b)) else False for b in range(n)]
+            num = random.getrandbits(mi)
+            self._bits = [True if num & (1 << (mi-1-b)) else False for b in range(mi)]
 
             # iterate from the random starting point
             for j in self.custom_range(twoN2):
@@ -98,6 +103,8 @@ class papadimitrious :
 
         return x1 or x2
 
+    def is_clause_satisfied_ex(self, clause):
+        return clause[4](clause)
 
     def is_satisfied(self, P):
 
@@ -105,7 +112,7 @@ class papadimitrious :
         unsats = []
         i = 0
         for i in xrange(len(P)):
-            ics = self.is_clause_satisfied(P[i])
+            ics = self.is_clause_satisfied_ex(P[i])
             is_sat = is_sat and ics
             if not ics:
                 unsats.append(i)
@@ -113,6 +120,17 @@ class papadimitrious :
 
         return is_sat, unsats
 
+    def not_x_or_y(self, clause):
+        return not self._bits[clause[1]] or self._bits[clause[3]]
+
+    def x_or_not_y(self, clause):
+        return self._bits[clause[1]] or not self._bits[clause[3]]
+
+    def not_x_or_not_y(self, clause):
+        return not self._bits[clause[1]] or not self._bits[clause[3]]
+
+    def x_or_y(self, clause):
+        return self._bits[clause[1]] or self._bits[clause[3]]
 
     def load_data(self, f, compute_distances = False):
         """Loads the graph from the file f.
@@ -136,9 +154,64 @@ class papadimitrious :
                     if p2 < 0:
                         n2 = True
 
-                    P.append( (n1, abs(p1) - 1, n2, abs(p2) - 1 ) )
+                    P.append( [n1, abs(p1) - 1, n2, abs(p2) - 1] )
 
-        return c, P
+        i = len(P) + 1
+        while i > len(P):
+            i = len(P)
+            P = reduce_problem(P)
+
+        v = set()
+        for p in P:
+            # Count unique vars
+            v.add(p[1])
+            v.add(p[3])
+            # and append eval function pointer
+            fn = None
+            if p[0] and p[2]:
+                # not not
+                fn = self.not_x_or_not_y
+            elif p[0] and not p[2]:
+                fn = self.not_x_or_y
+            elif not p[0] and p[2]:
+                fn = self.x_or_not_y
+            else:
+                fn = self.x_or_y
+
+            p.append(fn)
+
+        return len(v), P, c
+
+def reduce_problem(P):
+    notX = set()
+    X = set()
+    for p in P:
+        if p[0]:
+            notX.add(p[1])
+        else:
+            X.add(p[1])
+
+        if p[2]:
+            notX.add(p[3])
+        else:
+            X.add(p[3])
+
+    symDif = X.symmetric_difference(notX)
+
+    i = len(P) - 1
+    for i in xrange(len(P) - 1, 0, -1):
+        p = P[i]
+        if p[1] in symDif:
+            P.remove(p)
+
+        if p[3] in symDif and p in P:
+            P.remove(p)
+
+        #i -= 1
+        if i == 0:
+            break
+
+    return P
 
 def load_stanford_algs_test_cases(tests, test_cases_folder):
 
@@ -187,12 +260,12 @@ def main():
         # load the graph data (while timing it)
         start = timer()
         ts = time.time()
-        c, P = m.load_data(t[0])
+        c, P, mi = m.load_data(t[0])
         end = timer()
         print "loaded {0} in {1} secs at {2}".format(t[0], end - start, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
 
         start = timer()
-        res = m.run(c, P, True)
+        res = m.run(c, P, mi, True)
         end = timer()
 
         print "[{3}] satisfied = {0} in {1} secs = {2}/sec".format(res, end - start, len(P) / (end - start), it)
