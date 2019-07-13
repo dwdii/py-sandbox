@@ -33,6 +33,31 @@ are unsatisfiable. In the box below, enter a 6-bit string, where the ith bit
 should be 1 if the ith instance is satisfiable, and 0 otherwise. For example,
 if you think that the first 3 instances are satisfiable and the last 3 are not,
 then you should enter the string 111000 in the box below.
+
+loaded D:\Code\Python\py-sandbox\data\2sat1.txt in 189.184909484 secs at 2019-07-13 09:43:57
+Clauses: 7
+Vars: 8
+[0] satisfied = True in 0.191360947569 secs = 36.5800864227/sec
+True
+OK
+
+loading D:\Code\Python\py-sandbox\data\2sat2.txt started at 2019-07-13 10:27:53
+Original Clauses: 200000
+loaded D:\Code\Python\py-sandbox\data\2sat2.txt in 841.01747567 secs at 2019-07-13 10:27:53
+Clauses: 58
+Vars: 56
+[0] satisfied = False in 3.9025398202 secs = 14.8621161275/sec
+False
+OK
+
+loading D:\Code\Python\py-sandbox\data\2sat3.txt started at 2019-07-13 11:58:02
+Original Clauses: 400000
+loaded D:\Code\Python\py-sandbox\data\2sat3.txt in 3678.22998486 secs at 2019-07-13 11:58:02
+Clauses: 296
+Vars: 290
+[0] satisfied = True in 3.55349344117 secs = 83.2983104936/sec
+True
+OK
 """
 
 class papadimitrious :
@@ -142,6 +167,7 @@ class papadimitrious :
         with open(f) as fp:
             lines = fp.read().split("\n")
             c = int(lines[0])
+            print "Original Clauses: {0}".format(c)
             for line in lines[1:]:
                 if(len(line.strip()) > 0):
                     parts = line.split(" ")
@@ -183,6 +209,7 @@ class papadimitrious :
         return len(v), P, c
 
 def reduce_problem(P):
+
     notX = set()
     X = set()
     for p in P:
@@ -198,7 +225,6 @@ def reduce_problem(P):
 
     symDif = X.symmetric_difference(notX)
 
-    i = len(P) - 1
     for i in xrange(len(P) - 1, 0, -1):
         p = P[i]
         if p[1] in symDif:
@@ -207,7 +233,6 @@ def reduce_problem(P):
         if p[3] in symDif and p in P:
             P.remove(p)
 
-        #i -= 1
         if i == 0:
             break
 
@@ -239,16 +264,16 @@ def main():
         #("D:\\Code\\Python\\py-sandbox\\data\\graph-small2-dijkstra.txt", [1,2,3,4,5,6,7], {}, [0,5,3,4,5,6,6])
     ]
 
-    load_test_cases = True
+    load_test_cases = False
     tests_correct = 0
     if load_test_cases:
         load_stanford_algs_test_cases(tests, "D:\\Code\\other\\stanford-algs\\testcases\\course4\\assignment4TwoSat")
 
     # The real problem
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat1.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat2.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat3.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat4.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat1.txt", [True]))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat2.txt", [False]))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat3.txt", [True]))
+    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat4.txt", []))
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat5.txt", []))
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat6.txt", []))
 
@@ -260,6 +285,7 @@ def main():
         # load the graph data (while timing it)
         start = timer()
         ts = time.time()
+        print "loading {0} started at {1}".format(t[0], datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
         c, P, mi = m.load_data(t[0])
         end = timer()
         print "loaded {0} in {1} secs at {2}".format(t[0], end - start, datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S'))
