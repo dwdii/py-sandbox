@@ -76,6 +76,15 @@ Vars: 100
 [0] satisfied = False in 69.920781633 secs = 1.45879376085/sec
 False
 OK
+
+loading D:\Code\Python\py-sandbox\data\2sat6.txt started at 2019-07-14 08:05:20
+Original Clauses: 1000000
+loaded D:\Code\Python\py-sandbox\data\2sat6.txt in 25306.2207072 secs at 2019-07-14 08:05:20
+Clauses: 27
+Vars: 27
+[0] satisfied = False in 69.5119375955 secs = 0.388422491646/sec
+False
+OK
 """
 
 class papadimitrious :
