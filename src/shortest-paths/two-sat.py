@@ -67,6 +67,15 @@ Vars: 13
 [0] satisfied = True in 5.42684793774 secs = 2.21122834796/sec
 True
 OK
+
+loading D:\Code\Python\py-sandbox\data\2sat5.txt started at 2019-07-13 18:46:03
+Original Clauses: 800000
+loaded D:\Code\Python\py-sandbox\data\2sat5.txt in 15671.6702269 secs at 2019-07-13 18:46:03
+Clauses: 102
+Vars: 100
+[0] satisfied = False in 69.920781633 secs = 1.45879376085/sec
+False
+OK
 """
 
 class papadimitrious :
@@ -283,8 +292,8 @@ def main():
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat2.txt", [False]))
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat3.txt", [True]))
     #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat4.txt", [True]))
-    tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat5.txt", []))
-    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat6.txt", []))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat5.txt", [False]))
+    #tests.append(("D:\\Code\\Python\\py-sandbox\\data\\2sat6.txt", [False]))
 
     # iterate over the test cases
     it = 0
